@@ -96,12 +96,11 @@
                                         <div class="flex justify-center items-center gap-2">
                                             <button
                                                 class="editBtn w-9 h-9 flex items-center justify-center bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 hover:scale-105 transition"
-                                                data-id="{{ $item->id }}" data-name="{{ $item->name }}" data-stock="{{ $item->stock }}" data-unit="{{ $item->unit }}"
-                                                title="Edit">
+                                                data-id="{{ $item->id }}" data-name="{{ $item->name }}"
+                                                data-stock="{{ $item->stock }}" data-unit="{{ $item->unit }}" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            <form method="post"
-                                                action="{{ route('delinvent', ['id' => $item->id]) }}"
+                                            <form method="post" action="{{ route('delinvent', ['id' => $item->id]) }}"
                                                 class="inline deleteForm">
                                                 @csrf
                                                 @method('delete')
@@ -158,9 +157,17 @@
                 <div class="">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Unit</label>
-                        <input type="text" name="unit"
+                        <select name="unit"
                             class="w-full rounded-lg border-gray-300 shadow-sm p-2.5 border focus:ring-2 focus:ring-yellow-500"
                             required>
+                            <option value="" disabled selected>Pilih Unit</option>
+                            <option value="pcs">Pcs</option>
+                            <option value="kg">Kg</option>
+                            <option value="g">Gram</option>
+                            <option value="mg">Miligram</option>
+                            <option value="liter">Liter</option>
+                            <option value="ml">Mililiter</option>
+                        </select>
                     </div>
                 </div>
                 <button type="submit"
@@ -204,9 +211,17 @@
                 <div class="">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Unit</label>
-                        <input type="text" id="editUnit" name="unit"
+                        <select id="editUnit" name="unit"
                             class="w-full rounded-lg border-gray-300 shadow-sm p-2.5 border focus:ring-2 focus:ring-blue-500"
                             required>
+                            <option value="" disabled>Pilih Unit</option>
+                            <option value="pcs">Pcs</option>
+                            <option value="kg">Kg</option>
+                            <option value="g">Gram</option>
+                            <option value="mg">Miligram</option>
+                            <option value="liter">Liter</option>
+                            <option value="ml">Mililiter</option>
+                        </select>
                     </div>
                 </div>
                 <button type="submit"
@@ -222,7 +237,7 @@
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="//cdn.datatables.net/2.0.2/js/dataTables.min.js"></script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             // Init DataTable
             new DataTable('#myTable', {});
 
@@ -234,7 +249,7 @@
             $('#closeAddModal').click(() => addModal.addClass('hidden'));
 
             // Edit Logic
-            $(document).on('click', '.editBtn', function() {
+            $(document).on('click', '.editBtn', function () {
                 const btn = $(this);
                 $('#editName').val(btn.data('name'));
                 $('#editStock').val(btn.data('stock'));
@@ -252,7 +267,7 @@
             });
 
             // Delete confirmation
-            $(document).on('click', '.delete-confirm', function(e) {
+            $(document).on('click', '.delete-confirm', function (e) {
                 e.preventDefault();
                 const form = $(this).closest('form');
                 Swal.fire({

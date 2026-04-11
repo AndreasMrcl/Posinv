@@ -43,7 +43,7 @@
                     </h1>
                     <p class="text-sm text-gray-500">Manage system products</p>
                 </div>
-                    <div class="flex gap-2">
+                <div class="flex gap-2">
                     <button id="addBtn"
                         class="px-10 py-3 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition font-semibold flex items-center gap-2">
                         <i class="fas fa-plus"></i> Add

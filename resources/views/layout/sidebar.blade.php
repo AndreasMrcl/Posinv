@@ -7,7 +7,7 @@
                     <img class="w-24 h-12 mx-auto" src="{{ asset('/beil.svg') }}" alt="">
                 </a>
             </div>
-            <hr class="mx-5 shadow-2xl rounded-r-xl rounded-l-xl" />
+            <hr class="mx-5 shadow-2xl text-gray-300" />
             <div>
                 <ul class="">
                     <li class="p-4 mx-2">
@@ -44,7 +44,7 @@
                             </div>
                         </div>
                     </li>
-                    <hr class="mx-5 shadow-2xl bg-transparent rounded-r-xl rounded-l-xl" />
+                    <hr class="mx-5 shadow-2xl text-gray-300" />
                     <li class="p-4 mx-2">
                         <div class="ml-16 md:ml-14">
                             <a href="{{ route('category') }}">
@@ -108,7 +108,7 @@
                             </a>
                         </div>
                     </li>
-                    <hr class="mx-5 shadow-2xl bg-transparent rounded-r-xl rounded-l-xl" />
+                    <hr class="mx-5 shadow-2xl text-gray-300" />
                     <li class="p-4 mx-2">
                         <a class="" href="{{ route('bot') }}">
                             <div class="flex space-x-4">

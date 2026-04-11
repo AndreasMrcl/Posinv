@@ -129,7 +129,7 @@
                                 <label class="font-semibold text-gray-700">Nama Perusahaan</label>
                                 <input type="text"
                                     class="bg-white border border-gray-300 text-gray-900 p-3 rounded-xl w-full"
-                                    id="company" name="company" value="{{ old('company') }}" required />
+                                    id="store" name="store" value="{{ old('store') }}" required />
                             </div>
 
                             <div class="space-y-2">

@@ -25,10 +25,16 @@ class EnsureStoreIsValid
         $store = $user->store;
 
         if (! $store) {
+            if ($request->routeIs('addstore') || $request->routeIs('poststore')) {
+                return $next($request);
+            }
             return redirect()->route('addstore');
         }
 
         if ($store->status !== 'Settlement') {
+            if ($request->routeIs('addstore') || $request->routeIs('poststore')) {
+                return $next($request);
+            }
             return redirect()->route('login');
         }
 

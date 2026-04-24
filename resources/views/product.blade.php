@@ -44,14 +44,14 @@
                     <p class="text-sm text-gray-500">Manage system products</p>
                 </div>
                 <div class="flex gap-2">
-                    <button id="addBtn"
+                    <a href="{{ route('addproduct') }}"
                         class="px-10 py-3 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition font-semibold flex items-center gap-2">
                         <i class="fas fa-plus"></i> Add
-                    </button>
-                    <button id="addBtn"
+                    </a>
+                    <a href="{{ route('ingridient') }}"
                         class="px-10 py-3 bg-yellow-500 text-white rounded-lg shadow-md hover:bg-yellow-600 transition font-semibold flex items-center gap-2">
                         <i class="fa fa-wrench"></i> Set Ingridients
-                    </button>
+                    </a>
                 </div>
             </div>
 
@@ -119,120 +119,12 @@
         </div>
     </main>
 
-    <!-- ADD MODAL -->
-    <div id="addModal"
-        class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 overflow-y-auto px-4 py-6">
-        <div class="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl relative transform transition-all scale-100">
-            <button id="closeAddModal" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-            <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2">
-                <i class="fas fa-tags text-red-500"></i> Add
-            </h2>
-
-            <form id="addForm" method="post" action="{{ route('postcategory') }}" enctype="multipart/form-data"
-                class="space-y-5">
-                @csrf @method('post')
-
-                <div class="">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Name</label>
-                        <input type="text" name="name"
-                            class="w-full rounded-lg border-gray-300 shadow-sm p-2.5 border focus:ring-2 focus:ring-yellow-500"
-                            required>
-                    </div>
-                </div>
-
-                <div class="">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
-                        <textarea name="desc"
-                            class="w-full rounded-lg border-gray-300 shadow-sm p-2.5 border focus:ring-2 focus:ring-yellow-500"
-                            required></textarea>
-                    </div>
-                </div>
-
-                <button type="submit"
-                    class="w-full py-3 bg-red-500 text-white font-bold rounded-lg shadow-md hover:bg-yellow-600 transition flex justify-center items-center gap-2">
-                    <i class="fas fa-check"></i> Save
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- EDIT MODAL -->
-    <div id="editModal"
-        class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 overflow-y-auto px-4 py-6">
-        <div class="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl relative transform transition-all scale-100">
-            <button id="closeModal" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-            <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2">
-                <i class="fas fa-edit text-blue-600"></i> Edit
-            </h2>
-
-            <form id="editForm" method="post" enctype="multipart/form-data" class="space-y-5">
-                @csrf @method('put')
-
-                <div class="">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Name</label>
-                        <input type="text" id="editName" name="name"
-                            class="w-full rounded-lg border-gray-300 shadow-sm p-2.5 border focus:ring-2 focus:ring-blue-500"
-                            required>
-                    </div>
-                </div>
-
-                <div class="">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
-                        <textarea type="text" id="editDesc" name="desc"
-                            class="w-full rounded-lg border-gray-300 shadow-sm p-2.5 border focus:ring-2 focus:ring-blue-500"
-                            required></textarea>
-                    </div>
-                </div>
-
-                <button type="submit"
-                    class="w-full py-3 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition flex justify-center items-center gap-2">
-                    <i class="fas fa-save"></i> Update
-                </button>
-            </form>
-        </div>
-    </div>
-
     <!-- SCRIPTS -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="//cdn.datatables.net/2.0.2/js/dataTables.min.js"></script>
     <script>
         $(document).ready(function () {
-            // Init DataTable
-            new DataTable('#myTable', {});
-
-            // Modal Logic
-            const addModal = $('#addModal');
-            const editModal = $('#editModal');
-
-            $('#addBtn').click(() => addModal.removeClass('hidden'));
-            $('#closeAddModal').click(() => addModal.addClass('hidden'));
-
-            // Edit Logic
-            $(document).on('click', '.editBtn', function () {
-                const btn = $(this);
-                $('#editName').val(btn.data('name'));
-                $('#editDesc').val(btn.data('desc'));
-
-                $('#editForm').attr('action', `/category/${btn.data('id')}/update`);
-                editModal.removeClass('hidden');
-            });
-
-            $('#closeModal').click(() => editModal.addClass('hidden'));
-
-            $(window).click((e) => {
-                if (e.target === addModal[0]) addModal.addClass('hidden');
-                if (e.target === editModal[0]) editModal.addClass('hidden');
-            });
-
             // Delete confirmation
             $(document).on('click', '.delete-confirm', function (e) {
                 e.preventDefault();

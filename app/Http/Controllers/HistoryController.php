@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\OrderExport;
-use App\Models\Histoy;
+use App\Models\History;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Maatwebsite\Excel\Facades\Excel;
@@ -15,7 +15,7 @@ class HistoryController extends Controller
         $history = Cache::remember(
             'history',
             now()->addMinutes(60),
-            fn () => Histoy::all()
+            fn () => History::all()
         );
 
         return view('history', ['history' => $history]);
@@ -28,7 +28,7 @@ class HistoryController extends Controller
         ]);
 
         $month = $request->month;
-        $history = Histoy::whereMonth('created_at', $month)->get();
+        $history = History::whereMonth('created_at', $month)->get();
 
         return Excel::download(new OrderExport($history, $month), 'history_'.$month.'.xlsx');
     }

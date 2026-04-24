@@ -1,31 +1,49 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Customer;
 
+use App\Http\Controllers\Controller;
 use App\Models\Menu;
-use App\Models\User;
 use App\Models\Order;
-use App\Models\Profil;
 use App\Models\Showcase;
+use App\Services\InventoryService;
 use Illuminate\Support\Facades\Cache;
 
 class PagesController extends Controller
 {
     public function home()
     {
-        $showcase = Cache::remember('showcase', now()->addMinutes(60), function () {
-            return Showcase::select('id', 'img')->get();
+        $chair = auth()->user();
+        $storeId = $chair->store_id;
+
+        $showcase = Cache::remember("showcase_{$storeId}", now()->addMinutes(60), function () use ($storeId) {
+            return Showcase::where('store_id', $storeId)->select('id', 'img')->get();
         });
 
-        $profil = Cache::remember('profil', now()->addMinutes(60), function () {
-            return Profil::select('id', 'name', 'alamat')->get();
+        $profil = collect([$chair->store]);
+
+        $menus = Cache::remember("menus_{$storeId}", now()->addMinutes(60), function () use ($storeId) {
+            return Menu::where('store_id', $storeId)->select('id', 'name', 'price', 'img')->paginate(10);
         });
 
-        $menus = Cache::remember('menus', now()->addMinutes(60), function () {
-            return Menu::select('id', 'name', 'price', 'img')->paginate(10); // Use pagination
-        });
+        $pendingCart = null;
+        if (! session('cart_acknowledged', false)) {
+            $sessionStart = session('session_started_at');
 
-        return view('user.home', compact('profil', 'menus', 'showcase'));
+            $query = $chair->carts()
+                ->with('cartMenus.menu')
+                ->whereDoesntHave('orders')
+                ->whereHas('cartMenus')
+                ->where('expires_at', '>', now());
+
+            if ($sessionStart) {
+                $query->where('created_at', '<', $sessionStart);
+            }
+
+            $pendingCart = $query->latest()->first();
+        }
+
+        return view('user.home', compact('profil', 'menus', 'showcase', 'pendingCart'));
     }
 
     public function antrian()
@@ -43,6 +61,14 @@ class PagesController extends Controller
                     continue; // Skip further processing for this order
                 }
 
+                if (! config('midtrans.server_key')) {
+                    $statuses[$order->no_order] = (object) [
+                        'status' => $order->status ?? 'pending',
+                        'bg_color' => 'text-white text-center bg-gray-500 w-fit rounded-xl'
+                    ];
+                    continue;
+                }
+
                 \Midtrans\Config::$serverKey = config('midtrans.server_key');
                 \Midtrans\Config::$isProduction = true;
 
@@ -52,6 +78,10 @@ class PagesController extends Controller
                     'status' => $status->transaction_status,
                     'payment_type' => $status->payment_type ?? null,
                 ]);
+
+                if ($status->transaction_status === 'settlement') {
+                    app(InventoryService::class)->consumeForOrder($order);
+                }
 
                 if ($status->transaction_status === 'expire') {
                     $order->delete();
@@ -75,11 +105,8 @@ class PagesController extends Controller
 
     public function akun()
     {
-        $userId = auth()->id();
+        $user = auth()->user();
 
-        $user = Cache::remember("akun_{$userId}", now()->addMinutes(60), function () use ($userId) {
-            return User::find($userId); // Fetches the user from the database by ID
-        });
         return view('user.akun', compact('user'));
     }
 }

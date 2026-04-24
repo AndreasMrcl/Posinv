@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Discount;
 use App\Models\Expense;
-use App\Models\Histoy;
+use App\Models\History;
 use App\Models\Menu;
 use App\Models\Order;
 use App\Models\Settlement;
@@ -20,7 +20,7 @@ class Pagescontroller extends Controller
     //     $total_order = Order::count();
     //     $total_product = Menu::count();
     //     $total_users = User::where('level', 'user')->count();
-    //     $top_seller = Histoy::selectRaw("SUBSTRING_INDEX(`order`, ' - ', 1) AS product_name")
+    //     $top_seller = History::selectRaw("SUBSTRING_INDEX(`order`, ' - ', 1) AS product_name")
     //         ->groupBy('order')
     //         ->orderByRaw('COUNT(*) DESC')
     //         ->limit(1)
@@ -28,7 +28,7 @@ class Pagescontroller extends Controller
     //         ->first();
 
     //     // CHARTS ORDER
-    //     $orders = Histoy::selectRaw("COUNT(*) as count, DATE_FORMAT(created_at, '%M') as month_name, MONTH(created_at) as month_number")
+    //     $orders = History::selectRaw("COUNT(*) as count, DATE_FORMAT(created_at, '%M') as month_name, MONTH(created_at) as month_number")
     //         ->whereYear('created_at', date('Y'))
     //         ->groupBy('month_number', 'month_name')
     //         ->orderBy('month_number')
@@ -38,7 +38,7 @@ class Pagescontroller extends Controller
     //     $data1 = $orders->values();
 
     //     // CHARTS REVENUE
-    //     $revenue = Histoy::selectRaw("SUM(total_amount) as revenue, DATE_FORMAT(created_at, '%M') as month_name, MONTH(created_at) as month_number")
+    //     $revenue = History::selectRaw("SUM(total_amount) as revenue, DATE_FORMAT(created_at, '%M') as month_name, MONTH(created_at) as month_number")
     //         ->whereYear('created_at', date('Y'))
     //         ->groupBy('month_number', 'month_name')
     //         ->orderBy('month_number')
@@ -112,27 +112,28 @@ class Pagescontroller extends Controller
             ->get();
 
         // EMPLOYEE SEARCH
-        $employeeResults = User::where('name', 'LIKE', '%'.$query.'%')
-            ->where('level', 'admin')
-            ->orWhere('email', 'LIKE', '%'.$query.'%')
-            ->where('level', 'admin')
+        $employeeResults = User::where('level', 'admin')
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'LIKE', '%'.$query.'%')
+                    ->orWhere('email', 'LIKE', '%'.$query.'%');
+            })
             ->get();
 
         // CHAIR SEARCH
-        $chairResults = User::where('name', 'LIKE', '%'.$query.'%')
-            ->where('level', 'user')
-            ->orWhere('email', 'LIKE', '%'.$query.'%')
-            ->where('level', 'user')
+        $chairResults = User::where('level', 'user')
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'LIKE', '%'.$query.'%')
+                    ->orWhere('email', 'LIKE', '%'.$query.'%');
+            })
             ->get();
 
         // HISTORY SEARCH
-        $historyResults = Histoy::where('name', 'LIKE', '%'.$query.'%')
-            ->orWhere('kursi', 'LIKE', '%'.$query.'%')
+        $historyResults = History::where('name', 'LIKE', '%'.$query.'%')
+            ->orWhere('akun', 'LIKE', '%'.$query.'%')
             ->get();
 
         // DISCOUNT SEARCH
         $discountResults = Discount::where('name', 'LIKE', '%'.$query.'%')
-            ->orWhere('name', 'LIKE', '%'.$query.'%')
             ->get();
 
         return view('search', compact('orderResults', 'employeeResults', 'chairResults', 'historyResults', 'discountResults'));

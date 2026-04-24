@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('histoys', function (Blueprint $table) {
+        Schema::create('histories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('store_id')->constrained()->onUpdate('cascade')->onDelete('cascade')->nullable();
+            $table->foreignId('store_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->string('akun');
             $table->string('name');
             $table->string('no_order')->nullable();
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('histoys');
+        Schema::dropIfExists('histories');
     }
 };

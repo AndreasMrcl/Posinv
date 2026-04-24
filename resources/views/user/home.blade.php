@@ -56,6 +56,36 @@
 
 <body class="font-poppins bg-gray-50">
     <div class='w-full sm:max-w-sm mx-auto '>
+        @if (! empty($pendingCart))
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mx-2 mt-2 rounded-lg">
+                <div class="flex items-start gap-2 mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <div>
+                        <p class="font-semibold text-yellow-800">Ada pesanan sebelumnya di meja ini</p>
+                        <p class="text-sm text-yellow-700">
+                            {{ $pendingCart->cartMenus->count() }} item &middot;
+                            Rp {{ number_format($pendingCart->total_amount, 0, ',', '.') }}
+                        </p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <form action="{{ route('user-cart-acknowledge') }}" method="POST" class="flex-1">
+                        @csrf
+                        <button type="submit" class="w-full py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 font-semibold text-sm">
+                            Lanjutkan
+                        </button>
+                    </form>
+                    <form action="{{ route('user-cart-reset') }}" method="POST" class="flex-1">
+                        @csrf
+                        <button type="submit" class="w-full py-2 bg-white border border-yellow-500 text-yellow-700 rounded-md hover:bg-yellow-50 font-semibold text-sm">
+                            Mulai Baru
+                        </button>
+                    </form>
+                </div>
+            </div>
+        @endif
         <div class='sm:max-w-sm'>
             <div class="space-y-2">
                 @foreach ($profil as $item)
@@ -63,12 +93,12 @@
                         <div class="space-y-2 col-span-3">
                             <div class="flex gap-2">
                                 <div class="my-auto">
-                                    <h1 class="text-2xl text-white font-bold">{{ $item->name }}</h1>
+                                    <h1 class="text-2xl text-white font-bold">{{ $item->store }}</h1>
                                 </div>
                             </div>
                             <div>
                                 <div class="my-auto">
-                                    <h1 class="text-sm text-white font-light">{{ $item->alamat }}</h1>
+                                    <h1 class="text-sm text-white font-light">{{ $item->location }}</h1>
                                 </div>
                             </div>
                             <div class="flex justify-between">

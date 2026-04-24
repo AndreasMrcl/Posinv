@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Customer;
 
-use App\Models\Menu;
+use App\Http\Controllers\Controller;
+use App\Models\Cart;
 use App\Models\Category;
 use App\Models\Discount;
+use App\Models\Menu;
 use Illuminate\Support\Facades\Cache;
 
 class ProductController extends Controller
@@ -15,13 +17,8 @@ class ProductController extends Controller
             return Category::with(['menus'])->get();
         });
 
-        $user = auth()->user();
-
-        $cart = $user->carts()->latest()->first();
-
-        if (!$cart) {
-            $cart = $user->carts()->create([]);
-        }
+        $chair = auth()->user();
+        $cart = Cart::getActiveOrCreateForChair($chair);
 
         return view('user.product', compact('category', 'cart'));
     }

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Customer;
 
+use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\Profil;
 use Illuminate\Http\Request;
 
 class ServeController extends Controller
@@ -27,7 +27,7 @@ class ServeController extends Controller
     public function postDineIn()
     {
         $user = auth()->user();
-        $cabang = Profil::pluck('alamat')->first();
+        $cabang = auth()->user()->store->location;
         $cart = $user->carts()->with('user')->latest()->first();
 
         if (!$cart) {
@@ -38,16 +38,17 @@ class ServeController extends Controller
 
         if ($order) {
             $order->layanan = 'dineIn';
-            $order->alamat = null; // Set alamat to null
-            $order->ongkir = null; // Set ongkir to null    
+            $order->alamat = null;
+            $order->ongkir = null;
             $order->save();
         } else {
-            $order = new Order();
+            $order = new Order;
+            $order->store_id = $user->store_id;
             $order->cart_id = $cart->id;
             $order->cabang = $cabang;
             $order->layanan = 'dineIn';
-            $order->alamat = null; // Set alamat to null
-            $order->ongkir = null; // Set ongkir to null    
+            $order->alamat = null;
+            $order->ongkir = null;
             $order->save();
         }
 
@@ -57,10 +58,10 @@ class ServeController extends Controller
     public function postDelivery(Request $request)
     {
         $user = auth()->user();
-        $cabang = Profil::pluck('alamat')->first();
+        $cabang = auth()->user()->store->location;
         $cart = $user->carts()->with('user')->latest()->first();
 
-        if (!$cart) {
+        if (! $cart) {
             return redirect()->back()->with('error', 'No cart found.');
         }
 
@@ -70,7 +71,8 @@ class ServeController extends Controller
             $order->layanan = 'delivery';
             $order->save();
         } else {
-            $order = new Order();
+            $order = new Order;
+            $order->store_id = $user->store_id;
             $order->cart_id = $cart->id;
             $order->cabang = $cabang;
             $order->layanan = 'delivery';

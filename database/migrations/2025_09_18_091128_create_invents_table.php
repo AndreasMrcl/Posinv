@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('invents', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('store_id')->constrained()->onUpdate('cascade')->onDelete('cascade')->nullable();
+            $table->foreignId('store_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->string('name');
             $table->integer('stock');
+            $table->integer('min_stock')->default(0);
             $table->enum('unit', [
                 'pcs',
                 'kg',

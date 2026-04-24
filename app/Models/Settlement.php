@@ -30,8 +30,13 @@ class Settlement extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function histoys()
+    public function histories()
     {
-        return $this->hasMany(Histoy::class);
+        return $this->hasMany(History::class);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->whereNull('end_time');
     }
 }

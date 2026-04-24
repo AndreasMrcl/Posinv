@@ -79,8 +79,12 @@
                                     </td>
 
                                     <td class="p-4">
-                                        <div class="flex justify-center items-center">
-
+                                        <div class="flex justify-center items-center gap-2">
+                                            <a href="{{ route('chairqr', ['id' => $item->id]) }}"
+                                                class="w-9 h-9 flex items-center justify-center bg-yellow-500 text-white rounded-lg shadow hover:bg-yellow-600 hover:scale-105 transition"
+                                                title="Show QR" target="_blank">
+                                                <i class="fas fa-qrcode"></i>
+                                            </a>
                                             <form method="post"
                                                 action="{{ route('delchair', ['id' => $item->id]) }}"
                                                 class="inline deleteForm">

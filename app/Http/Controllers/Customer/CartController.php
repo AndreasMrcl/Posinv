@@ -1,23 +1,21 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Customer;
 
-use App\Models\Menu;
+use App\Http\Controllers\Controller;
+use App\Models\Cart;
 use App\Models\CartMenu;
 use App\Models\Discount;
+use App\Models\Menu;
+use App\Services\InventoryService;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
     public function cart()
     {
-        $user = auth()->user();
-
-        $cart = $user->carts()->latest()->first();
-
-        if (!$cart) {
-            $cart = $user->carts()->create([]);
-        }
+        $chair = auth()->user();
+        $cart = Cart::getActiveOrCreateForChair($chair);
 
         return view('user.cart', compact('cart'));
     }
@@ -28,16 +26,24 @@ class CartController extends Controller
             'menu_id' => 'required|exists:menus,id',
             'quantity' => 'required|integer|min:1',
             'notes' => 'nullable|string',
-            'discount_id' => 'nullable|exists:discounts,id', // Discount can be nullable
+            'discount_id' => 'nullable|exists:discounts,id',
         ]);
 
-        $user = auth()->user();
-        $cart = $user->carts()->latest()->first() ?? $user->carts()->create(['total_amount' => 0]);
+        $chair = auth()->user();
+        $storeId = $chair->store_id;
+
+        $cart = Cart::getActiveOrCreateForChair($chair);
 
         $menu = Menu::findOrFail($request->input('menu_id'));
-        $quantity = $request->input('quantity');
+        $quantity = (int) $request->input('quantity');
 
-        $subtotal = (float)$menu->price * (int)$quantity;
+        $insufficient = app(InventoryService::class)->canFulfillCart($cart, $menu, $quantity);
+
+        if (! empty($insufficient)) {
+            return redirect()->back()->with('error', 'Stok bahan tidak cukup: '.implode(', ', $insufficient));
+        }
+
+        $subtotal = (float) $menu->price * $quantity;
 
         $discount = null;
 
@@ -45,7 +51,7 @@ class CartController extends Controller
             $discount = Discount::find($request->input('discount_id'));
             if ($discount) {
                 $discountAmount = $subtotal * ($discount->percentage / 100);
-                $subtotal -= $discountAmount; // Apply discount
+                $subtotal -= $discountAmount;
             }
         }
 
@@ -61,35 +67,73 @@ class CartController extends Controller
             $existingCartMenu->save();
         } else {
             CartMenu::create([
+                'store_id' => $storeId,
                 'cart_id' => $cart->id,
                 'menu_id' => $menu->id,
                 'quantity' => $quantity,
                 'notes' => $request->input('notes'),
                 'subtotal' => $subtotal,
-                'discount_id' => $discount ? $discount->id : null, // Assign discount ID if applicable
+                'discount_id' => $discount ? $discount->id : null,
             ]);
         }
 
-        $cart->update(['total_amount' => $cart->total_amount + $subtotal]);
+        $cart->update([
+            'total_amount' => $cart->total_amount + $subtotal,
+            'expires_at' => now()->addMinutes(Cart::EXPIRATION_MINUTES),
+        ]);
 
         return redirect(route('user-product'));
     }
 
     public function removecart($id)
     {
-        $user = auth()->user();
-        $cart = $user->carts()->latest()->first();
+        $chair = auth()->user();
 
-        $cartMenu = CartMenu::findOrFail($id);
+        $cartMenu = CartMenu::where('id', $id)
+            ->whereHas('cart', function ($query) use ($chair) {
+                $query->where('chair_id', $chair->id)
+                    ->whereDoesntHave('orders');
+            })
+            ->firstOrFail();
 
+        $cart = $cartMenu->cart;
         $subtotal = $cartMenu->subtotal;
-
-        $cartMenu->discount_id;
-
         $cartMenu->delete();
 
-        $cart->update(['total_amount' => $cart->total_amount - $subtotal]);
+        $cart->update([
+            'total_amount' => $cart->total_amount - $subtotal,
+            'expires_at' => now()->addMinutes(Cart::EXPIRATION_MINUTES),
+        ]);
 
         return redirect()->route('user-cart');
+    }
+
+    public function acknowledge(Request $request)
+    {
+        $request->session()->put('cart_acknowledged', true);
+
+        return redirect()->route('user-home');
+    }
+
+    public function reset(Request $request)
+    {
+        $chair = auth()->user();
+
+        $cart = $chair->carts()
+            ->whereDoesntHave('orders')
+            ->latest()
+            ->first();
+
+        if ($cart) {
+            $cart->cartMenus()->delete();
+            $cart->update([
+                'total_amount' => 0,
+                'expires_at' => now()->addMinutes(Cart::EXPIRATION_MINUTES),
+            ]);
+        }
+
+        $request->session()->put('cart_acknowledged', true);
+
+        return redirect()->route('user-home')->with('success', 'Mulai pesanan baru.');
     }
 }

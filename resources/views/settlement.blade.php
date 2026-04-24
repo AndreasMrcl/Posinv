@@ -45,13 +45,13 @@
                 </div>
                 <div class="flex gap-2">
 
-                    <button id="addBtn"
+                    <button id="startBtn"
                         class="px-10 py-3 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition font-semibold flex items-center gap-2">
                         <i class="fas fa-plus"></i> Start
                     </button>
-                    <button id="addBtn"
+                    <button id="endBtn"
                         class="px-10 py-3 bg-yellow-500 text-white rounded-lg shadow-md hover:bg-yellow-600 transition font-semibold flex items-center gap-2">
-                        <i class="fas fa-plus"></i> End
+                        <i class="fas fa-stop"></i> End
                     </button>
                 </div>
             </div>
@@ -117,11 +117,6 @@
 
                                     <td class="p-4">
                                         <span class="font-semibold text-gray-800">
-                                            Rp. {{ number_format($item->total_amount, 0, ',', '.') }}
-                                        </span>
-                                    </td>
-                                    <td class="p-4">
-                                        <span class="font-semibold text-gray-800">
                                             Rp. {{ number_format($item->expected, 0, ',', '.') }}
                                         </span>
                                     </td>
@@ -129,18 +124,13 @@
                                     <td class="p-4">
                                         <div class="flex justify-center items-center gap-2">
 
-                                            <form method="post" action="{{ route('delcategory', ['id' => $item->id]) }}"
-                                                class="inline deleteForm">
-                                                @csrf
-                                                @method('delete')
-                                                <button type="button"
-                                                    class="delete-confirm w-9 h-9 flex items-center justify-center bg-red-500 text-white rounded-lg shadow hover:bg-red-600 hover:scale-105 transition"
-                                                    title="Hapus">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            <a href="{{ route('showsettlement', ['id' => $item->id]) }}"
+                                                class="w-9 h-9 flex items-center justify-center bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 hover:scale-105 transition"
+                                                title="Lihat">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
 
-                                            <form method="post" action="{{ route('delcategory', ['id' => $item->id]) }}"
+                                            <form method="post" action="{{ route('delsettlement', ['id' => $item->id]) }}"
                                                 class="inline deleteForm">
                                                 @csrf
                                                 @method('delete')
@@ -164,81 +154,62 @@
     </main>
 
     <!-- START MODAL -->
-    <div id="addModal"
+    <div id="startModal"
         class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 overflow-y-auto px-4 py-6">
         <div class="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl relative transform transition-all scale-100">
-            <button id="closeAddModal" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition">
+            <button id="closeStartModal" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition">
                 <i class="fas fa-times text-xl"></i>
             </button>
             <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2">
-                <i class="fas fa-tags text-red-500"></i> Add
+                <i class="fas fa-play text-red-500"></i> Buka Shift
             </h2>
 
-            <form id="addForm" method="post" action="{{ route('postcategory') }}" enctype="multipart/form-data"
-                class="space-y-5">
+            <form id="startForm" method="post" action="{{ route('poststart') }}" class="space-y-5">
                 @csrf @method('post')
 
                 <div class="">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Name</label>
-                        <input type="text" name="name"
-                            class="w-full rounded-lg border-gray-300 shadow-sm p-2.5 border focus:ring-2 focus:ring-yellow-500"
-                            required>
-                    </div>
-                </div>
-
-                <div class="">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
-                        <textarea name="desc"
-                            class="w-full rounded-lg border-gray-300 shadow-sm p-2.5 border focus:ring-2 focus:ring-yellow-500"
-                            required></textarea>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Modal Awal (Rp)</label>
+                        <input type="number" name="start_amount" min="0" step="1"
+                            class="w-full rounded-lg border-gray-300 shadow-sm p-2.5 border focus:ring-2 focus:ring-red-500"
+                            placeholder="0">
                     </div>
                 </div>
 
                 <button type="submit"
-                    class="w-full py-3 bg-red-500 text-white font-bold rounded-lg shadow-md hover:bg-yellow-600 transition flex justify-center items-center gap-2">
-                    <i class="fas fa-check"></i> Save
+                    class="w-full py-3 bg-red-500 text-white font-bold rounded-lg shadow-md hover:bg-red-600 transition flex justify-center items-center gap-2">
+                    <i class="fas fa-check"></i> Buka Shift
                 </button>
             </form>
         </div>
     </div>
 
     <!-- END MODAL -->
-    <div id="editModal"
+    <div id="endModal"
         class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 overflow-y-auto px-4 py-6">
         <div class="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl relative transform transition-all scale-100">
-            <button id="closeModal" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition">
+            <button id="closeEndModal" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition">
                 <i class="fas fa-times text-xl"></i>
             </button>
             <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2">
-                <i class="fas fa-edit text-blue-600"></i> Edit
+                <i class="fas fa-stop text-yellow-500"></i> Tutup Shift
             </h2>
 
-            <form id="editForm" method="post" enctype="multipart/form-data" class="space-y-5">
-                @csrf @method('put')
+            <form id="endForm" method="post" action="{{ route('posttotal') }}" class="space-y-5">
+                @csrf @method('post')
 
                 <div class="">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Name</label>
-                        <input type="text" id="editName" name="name"
-                            class="w-full rounded-lg border-gray-300 shadow-sm p-2.5 border focus:ring-2 focus:ring-blue-500"
-                            required>
-                    </div>
-                </div>
-
-                <div class="">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
-                        <textarea type="text" id="editDesc" name="desc"
-                            class="w-full rounded-lg border-gray-300 shadow-sm p-2.5 border focus:ring-2 focus:ring-blue-500"
-                            required></textarea>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Total Uang di Laci (Rp)</label>
+                        <input type="number" name="total_amount" min="0" step="1"
+                            class="w-full rounded-lg border-gray-300 shadow-sm p-2.5 border focus:ring-2 focus:ring-yellow-500"
+                            placeholder="0">
                     </div>
                 </div>
 
                 <button type="submit"
-                    class="w-full py-3 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition flex justify-center items-center gap-2">
-                    <i class="fas fa-save"></i> Update
+                    class="w-full py-3 bg-yellow-500 text-white font-bold rounded-lg shadow-md hover:bg-yellow-600 transition flex justify-center items-center gap-2">
+                    <i class="fas fa-check"></i> Tutup Shift
                 </button>
             </form>
         </div>
@@ -254,27 +225,18 @@
             new DataTable('#myTable', {});
 
             // Modal Logic
-            const addModal = $('#addModal');
-            const editModal = $('#editModal');
+            const startModal = $('#startModal');
+            const endModal = $('#endModal');
 
-            $('#addBtn').click(() => addModal.removeClass('hidden'));
-            $('#closeAddModal').click(() => addModal.addClass('hidden'));
+            $('#startBtn').click(() => startModal.removeClass('hidden'));
+            $('#closeStartModal').click(() => startModal.addClass('hidden'));
 
-            // Edit Logic
-            $(document).on('click', '.editBtn', function () {
-                const btn = $(this);
-                $('#editName').val(btn.data('name'));
-                $('#editDesc').val(btn.data('desc'));
-
-                $('#editForm').attr('action', `/category/${btn.data('id')}/update`);
-                editModal.removeClass('hidden');
-            });
-
-            $('#closeModal').click(() => editModal.addClass('hidden'));
+            $('#endBtn').click(() => endModal.removeClass('hidden'));
+            $('#closeEndModal').click(() => endModal.addClass('hidden'));
 
             $(window).click((e) => {
-                if (e.target === addModal[0]) addModal.addClass('hidden');
-                if (e.target === editModal[0]) editModal.addClass('hidden');
+                if (e.target === startModal[0]) startModal.addClass('hidden');
+                if (e.target === endModal[0]) endModal.addClass('hidden');
             });
 
             // Delete confirmation

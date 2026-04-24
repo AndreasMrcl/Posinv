@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Chair;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,6 +15,21 @@ class AuthController extends Controller
 
     public function signin(Request $request)
     {
+        if ($request->filled('qrToken')) {
+            $chair = Chair::where('qr_token', $request->input('qrToken'))->first();
+
+            if (! $chair) {
+                return redirect()->route('login')
+                    ->withErrors(['qrToken' => 'QR code tidak valid. Silakan minta QR baru ke kasir.']);
+            }
+
+            Auth::guard('chair')->login($chair);
+            $request->session()->regenerate();
+            $request->session()->put('session_started_at', now());
+
+            return redirect()->route('user-home');
+        }
+
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
@@ -26,12 +42,17 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
+        if (Auth::user() instanceof Chair) {
+            return redirect()->route('user-home');
+        }
+
         return redirect()->route('dashboard');
     }
 
     public function logout(Request $request)
     {
-        Auth::logout();
+        Auth::guard('web')->logout();
+        Auth::guard('chair')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

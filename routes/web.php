@@ -5,6 +5,11 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ChairController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\Customer\CartController as CustomerCartController;
+use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
+use App\Http\Controllers\Customer\PagesController as CustomerPagesController;
+use App\Http\Controllers\Customer\ProductController as CustomerProductController;
+use App\Http\Controllers\Customer\ServeController as CustomerServeController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\HistoryController;
@@ -41,6 +46,7 @@ Route::middleware(['auth:sanctum', 'ensure'])->group(function () {
     // CHAIR CONTROLLER
     Route::get('/chair', [ChairController::class, 'index'])->name('chair');
     Route::post('/postchair', [ChairController::class, 'store'])->name('postchair');
+    Route::get('/chair/{id}/qr', [ChairController::class, 'qr'])->name('chairqr');
     Route::delete('/chair/{id}/delete', [ChairController::class, 'destroy'])->name('delchair');
 
     // QR CONTROLLER
@@ -51,6 +57,7 @@ Route::middleware(['auth:sanctum', 'ensure'])->group(function () {
     Route::post('/postinvent', [InventController::class, 'store'])->name('postinvent');
     Route::put('/invent/{id}/update', [InventController::class, 'update'])->name('updateinvent');
     Route::delete('/invent/{id}/delete', [InventController::class, 'destroy'])->name('delinvent');
+    Route::post('/invent/receive', [InventController::class, 'receive'])->name('receiveinvent');
 
     // ORDER CONTROLLER
     Route::get('/order', [OrderController::class, 'index'])->name('order');
@@ -122,7 +129,39 @@ Route::middleware(['auth:sanctum', 'ensure'])->group(function () {
     // CONSULT
     Route::get('/bot', [ChatController::class, 'bot'])->name('bot');
     Route::post('/gen', [ChatController::class, 'gen'])->name('gen');
+});
 
-    // LOGOUT
+// CUSTOMER routes (chair guard)
+Route::middleware(['auth:chair', 'ensure'])->group(function () {
+    // CUSTOMER PAGES CONTROLLER
+    Route::get('/customer', [CustomerPagesController::class, 'home'])->name('user-home');
+    Route::get('/customer/antrian', [CustomerPagesController::class, 'antrian'])->name('user-antrian');
+    Route::get('/customer/akun', [CustomerPagesController::class, 'akun'])->name('user-akun');
+
+    // CUSTOMER PRODUCT CONTROLLER
+    Route::get('/customer/product', [CustomerProductController::class, 'product'])->name('user-product');
+    Route::get('/customer/product/{id}', [CustomerProductController::class, 'show'])->name('user-show');
+
+    // CUSTOMER CART CONTROLLER
+    Route::get('/customer/cart', [CustomerCartController::class, 'cart'])->name('user-cart');
+    Route::post('/customer/cart', [CustomerCartController::class, 'postcart'])->name('user-postcart');
+    Route::delete('/customer/cart/{id}/delete', [CustomerCartController::class, 'removecart'])->name('user-removecart');
+    Route::post('/customer/cart/acknowledge', [CustomerCartController::class, 'acknowledge'])->name('user-cart-acknowledge');
+    Route::post('/customer/cart/reset', [CustomerCartController::class, 'reset'])->name('user-cart-reset');
+
+    // CUSTOMER SERVE CONTROLLER
+    Route::get('/customer/serve', [CustomerServeController::class, 'serve'])->name('user-serve');
+    Route::get('/customer/locate', [CustomerServeController::class, 'locate'])->name('user-locate');
+    Route::post('/customer/serve/dinein', [CustomerServeController::class, 'postDineIn'])->name('user-postdineIn');
+    Route::post('/customer/serve/delivery', [CustomerServeController::class, 'postDelivery'])->name('user-postdelivery');
+    Route::post('/customer/ongkir', [CustomerServeController::class, 'ongkir'])->name('user-ongkir');
+
+    // CUSTOMER ORDER CONTROLLER
+    Route::post('/customer/order', [CustomerOrderController::class, 'postorder'])->name('user-postorder');
+    Route::get('/customer/payment', [CustomerOrderController::class, 'payment'])->name('user-payment');
+});
+
+// LOGOUT - works for both admin (web/sanctum) and chair
+Route::middleware(['auth:sanctum,chair'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });

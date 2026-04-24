@@ -55,6 +55,19 @@ class ChairController extends Controller
             ->with('access_token', $token);
     }
 
+    public function qr(int $id)
+    {
+        $userStore = Auth::user()->store;
+
+        $chair = Chair::where('id', $id)
+            ->where('store_id', $userStore->id)
+            ->firstOrFail();
+
+        $signinUrl = route('signin', ['qrToken' => $chair->qr_token]);
+
+        return view('chairqr', compact('chair', 'signinUrl'));
+    }
+
     public function destroy(int $id)
     {
         $userStore = Auth::user()->store;

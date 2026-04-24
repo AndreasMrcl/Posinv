@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CartMenu;
 use App\Models\Discount;
 use App\Models\Menu;
+use App\Services\InventoryService;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
@@ -26,11 +27,22 @@ class CartController extends Controller
         ]);
 
         $user = auth()->user();
+        $storeId = $user->store->id;
         $cart = $user->carts()->latest()->first()
-            ?? $user->carts()->create(['total_amount' => 0]);
+            ?? $user->carts()->create([
+                'store_id' => $storeId,
+                'total_amount' => 0,
+            ]);
 
         $menu = Menu::findOrFail($request->menu_id);
         $quantity = (int) $request->quantity;
+
+        $insufficient = app(InventoryService::class)->canFulfillCart($cart, $menu, $quantity);
+
+        if (! empty($insufficient)) {
+            return redirect()->back()->with('error', 'Stok bahan tidak cukup: '.implode(', ', $insufficient));
+        }
+
         $subtotal = $menu->price * $quantity;
 
         // Hitung discount jika ada
@@ -56,6 +68,7 @@ class CartController extends Controller
             $existingCartMenu->increment('subtotal', $subtotal);
         } else {
             CartMenu::create([
+                'store_id' => $storeId,
                 'cart_id' => $cart->id,
                 'menu_id' => $menu->id,
                 'quantity' => $quantity,

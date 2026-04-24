@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\InsufficientStockException;
 use App\Models\Cart;
-use App\Models\Histoy;
+use App\Models\History;
 use App\Models\Order;
-use App\Models\Settlement;
+use App\Services\InventoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +30,15 @@ class OrderController extends Controller
                     continue; // Skip further processing for this order
                 }
 
+                if (! config('midtrans.server_key')) {
+                    $statuses[$order->no_order] = (object) [
+                        'status' => $order->status ?? 'pending',
+                        'bg_color' => 'text-white text-center bg-gray-500 w-fit rounded-xl',
+                    ];
+
+                    continue;
+                }
+
                 \Midtrans\Config::$serverKey = config('midtrans.server_key');
                 \Midtrans\Config::$isProduction = true;
 
@@ -38,6 +48,10 @@ class OrderController extends Controller
                     'status' => $status->transaction_status,
                     'payment_type' => $status->payment_type ?? null,
                 ]);
+
+                if ($status->transaction_status === 'settlement') {
+                    app(InventoryService::class)->consumeForOrder($order);
+                }
 
                 if ($status->transaction_status === 'expire') {
                     $order->delete();
@@ -67,7 +81,7 @@ class OrderController extends Controller
         $cart = $user->carts()->latest()->first();
 
         if (! $cart) {
-            $cart = $user->carts()->create([]);
+            $cart = $user->carts()->create(['store_id' => $user->store->id]);
         }
 
         return view('addorder', compact('cart'));
@@ -84,62 +98,67 @@ class OrderController extends Controller
 
         $cart = $user->carts()->with('user', 'cartMenus.menu')->latest()->first();
 
-        \Midtrans\Config::$serverKey = config('midtrans.server_key');
-        \Midtrans\Config::$isProduction = true;
-        \Midtrans\Config::$isSanitized = true;
-        \Midtrans\Config::$is3ds = true;
-
         $orderId = 'ORDER-'.strtoupper(substr(Uuid::uuid4()->toString(), 0, 8));
 
-        $items = $cart->cartMenus->map(function ($cartMenu) {
-            return [
-                'id' => $cartMenu->menu_id,
-                'price' => (int) $cartMenu->menu->price,
-                'quantity' => (int) $cartMenu->quantity,
-                'name' => $cartMenu->menu->name,
-            ];
-        })->toArray();
-
-        $billing_address = [
-            'first_name' => $request->atas_nama,
-            'last_name' => '',
-            'address' => $request->alamat ?? 'N/A',
-            'city' => 'N/A',
-            'postal_code' => 'N/A',
-            'phone' => $request->no_telpon,
-            'country_code' => 'IDN',
-        ];
-
-        $shipping_address = $billing_address;
-
-        $customer_details = [
-            'first_name' => $request->atas_nama,
-            'last_name' => '',
-            'email' => $user->email,
-            'phone' => $request->no_telpon,
-            'billing_address' => $billing_address,
-            'shipping_address' => $shipping_address,
-        ];
-
-        $params = [
-            'transaction_details' => [
-                'order_id' => $orderId,
-                'gross_amount' => $cart->total_amount + ($request->ongkir ?? 0),
-            ],
-            'item_details' => $items,
-            'customer_details' => $customer_details,
-        ];
-
         $order = new Order;
+        $order->store_id = $user->store->id;
         $order->cart_id = $cart->id;
         $order->no_order = $orderId;
         $order->atas_nama = $request->atas_nama;
         $order->no_telpon = $request->no_telpon;
         $order->save();
 
-        $snapToken = \Midtrans\Snap::getSnapToken($params);
+        $snapToken = null;
 
-        $user->carts()->create();
+        if (config('midtrans.server_key')) {
+            \Midtrans\Config::$serverKey = config('midtrans.server_key');
+            \Midtrans\Config::$isProduction = true;
+            \Midtrans\Config::$isSanitized = true;
+            \Midtrans\Config::$is3ds = true;
+
+            $items = $cart->cartMenus->map(function ($cartMenu) {
+                return [
+                    'id' => $cartMenu->menu_id,
+                    'price' => (int) $cartMenu->menu->price,
+                    'quantity' => (int) $cartMenu->quantity,
+                    'name' => $cartMenu->menu->name,
+                ];
+            })->toArray();
+
+            $billing_address = [
+                'first_name' => $request->atas_nama,
+                'last_name' => '',
+                'address' => $request->alamat ?? 'N/A',
+                'city' => 'N/A',
+                'postal_code' => 'N/A',
+                'phone' => $request->no_telpon,
+                'country_code' => 'IDN',
+            ];
+
+            $shipping_address = $billing_address;
+
+            $customer_details = [
+                'first_name' => $request->atas_nama,
+                'last_name' => '',
+                'email' => $user->email,
+                'phone' => $request->no_telpon,
+                'billing_address' => $billing_address,
+                'shipping_address' => $shipping_address,
+            ];
+
+            $params = [
+                'transaction_details' => [
+                    'order_id' => $orderId,
+                    'gross_amount' => $cart->total_amount + ($request->ongkir ?? 0),
+                ],
+                'item_details' => $items,
+                'customer_details' => $customer_details,
+            ];
+
+            $snapToken = \Midtrans\Snap::getSnapToken($params);
+        }
+
+        $user->carts()->create(['store_id' => $user->store->id]);
 
         return view('checkout', compact('snapToken', 'order'));
     }
@@ -150,23 +169,18 @@ class OrderController extends Controller
 
         $user = auth()->user();
 
-        $settlement = $user->settlements()->latest()->first();
+        $settlement = $user->settlements()->active()->first();
 
         if (! $settlement) {
-            $settlement = new Settlement;
-            $settlement->user_id = $user->id;
-            $settlement->start_time = now(); // Set as needed
-            $settlement->start_amount = 0; // Initialize as needed
-            $settlement->total_amount = 0; // Initialize as needed
-            $settlement->expected = 0; // Initialize as needed
-            $settlement->save();
+            return redirect()->back()->with('error', 'Buka shift dulu sebelum mengarsipkan order.');
         }
 
         DB::transaction(function () use ($order, $settlement) {
-            $history = new Histoy;
+            $history = new History;
             $history->id = $order->id; // Assuming you want to keep the same ID
+            $history->store_id = $settlement->store_id;
             $history->no_order = $order->no_order;
-            $history->kursi = $order->cart->user->name;
+            $history->akun = $order->cart->user->name;
             $history->name = $order->atas_nama;
             $orderDetails = '';
 
@@ -184,11 +198,11 @@ class OrderController extends Controller
 
             Cache::forget('history');
             Cache::remember('history', now()->addMinutes(60), function () {
-                return Histoy::all();
+                return History::all();
             });
 
-            $totalHistoyAmount = $settlement->histoys()->sum('total_amount');
-            $settlement->expected = $totalHistoyAmount + $settlement->start_amount;
+            $totalHistoryAmount = $settlement->histories()->sum('total_amount');
+            $settlement->expected = $totalHistoryAmount + $settlement->start_amount;
             $settlement->save();
 
             foreach ($order->cart->cartMenus as $cartMenu) {
@@ -215,18 +229,27 @@ class OrderController extends Controller
         $orderId = $request->input('order_id');
         $order = Order::find($orderId);
 
-        if ($order) {
-            $order->status = 'settlement';
-            $order->payment_type = 'cash';
-            $order->save();
-
-            $newCart = new Cart;
-            $newCart->user_id = $order->cart->user_id;
-            $newCart->save();
-
-            return redirect()->route('order')->with('success', 'Cash payment successful!');
+        if (! $order) {
+            return redirect()->route('order')->with('error', 'Cash payment failed!');
         }
 
-        return redirect()->route('order')->with('error', 'Cash payment failed!');
+        try {
+            DB::transaction(function () use ($order) {
+                $order->status = 'settlement';
+                $order->payment_type = 'cash';
+                $order->save();
+
+                app(InventoryService::class)->consumeForOrder($order, strict: true);
+
+                $newCart = new Cart;
+                $newCart->store_id = $order->store_id;
+                $newCart->user_id = $order->cart->user_id;
+                $newCart->save();
+            });
+
+            return redirect()->route('order')->with('success', 'Cash payment successful!');
+        } catch (InsufficientStockException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 }

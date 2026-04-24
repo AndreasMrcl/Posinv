@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('invent_menus', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('store_id')->constrained()->onUpdate('cascade')->onDelete('cascade')->nullable();
+            $table->foreignId('store_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('menu_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
             $table->foreignId('invent_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
             $table->integer('quantity_used');

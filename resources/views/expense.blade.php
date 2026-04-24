@@ -58,7 +58,7 @@
                                 <th class="p-4 font-bold text-center rounded-tl-lg" width="5%">No</th>
                                 <th class="p-4 font-bold text-center" width="20%">Created at</th>
                                 <th class="p-4 font-bold">Name</th>
-                                <th class="p-4 font-bold">Nomine</th>
+                                <th class="p-4 font-bold">Nominal</th>
                                 <th class="p-4 font-bold text-center rounded-tr-lg" width="15%">Action</th>
                             </tr>
                         </thead>

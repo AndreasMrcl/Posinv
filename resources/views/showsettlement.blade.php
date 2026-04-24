@@ -59,7 +59,7 @@
                                 @php
                                     $no = 1;
                                 @endphp
-                                @foreach ($settlement->histoys as $item)
+                                @foreach ($settlement->histories as $item)
                                     <tr class="border-2">
                                         <td>{{ $no++ }}</td>
                                         <td>{{ $item->name }}</td>

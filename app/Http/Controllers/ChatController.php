@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Chat;
-use App\Models\Histoy;
+use App\Models\History;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -116,6 +116,7 @@ class ChatController extends Controller
     private function saveChat(string $prompt, string $response): void
     {
         Chat::create([
+            'store_id' => Auth::user()->store->id,
             'prompt' => $prompt,
             'response' => $response,
         ]);
@@ -190,7 +191,7 @@ class ChatController extends Controller
     private function getTotalSalesToday(): string
     {
         $today = now()->toDateString();
-        $total = Histoy::where('status', 'settlement')
+        $total = History::where('status', 'settlement')
             ->whereDate('created_at', $today)
             ->sum('total_amount');
 
@@ -216,7 +217,7 @@ class ChatController extends Controller
             }
         }
 
-        $total = Histoy::where('status', 'settlement')
+        $total = History::where('status', 'settlement')
             ->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->sum('total_amount');
@@ -228,7 +229,7 @@ class ChatController extends Controller
 
     private function getOrdersToday(): string
     {
-        $count = Histoy::where('status', 'settlement')
+        $count = History::where('status', 'settlement')
             ->whereDate('created_at', now())
             ->count();
 
@@ -237,7 +238,7 @@ class ChatController extends Controller
 
     private function getTopPayment(): string
     {
-        $top = Histoy::where('status', 'settlement')
+        $top = History::where('status', 'settlement')
             ->select('payment_type', DB::raw('COUNT(*) as total'))
             ->groupBy('payment_type')
             ->orderByDesc('total')
@@ -263,7 +264,7 @@ class ChatController extends Controller
     {
         $startOfWeek = now()->startOfWeek();
         $endOfWeek = now()->endOfWeek();
-        $sales = Histoy::where('status', 'settlement')
+        $sales = History::where('status', 'settlement')
             ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
             ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
             ->groupBy('date')
@@ -284,7 +285,7 @@ class ChatController extends Controller
 
     private function getBestSellingProducts(): string
     {
-        $productsRaw = Histoy::where('status', 'settlement')->get(['order']);
+        $productsRaw = History::where('status', 'settlement')->get(['order']);
 
         $productCounts = [];
 
@@ -320,7 +321,7 @@ class ChatController extends Controller
 
     private function getBranchSales(string $storeName): string
     {
-        $total = Histoy::whereRaw('LOWER(store_name) = ?', [strtolower($storeName)])
+        $total = History::whereRaw('LOWER(store_name) = ?', [strtolower($storeName)])
             ->where('status', 'settlement')
             ->whereDate('created_at', now()->toDateString())
             ->sum('total_amount');
@@ -335,11 +336,11 @@ class ChatController extends Controller
     private function getAverageSalesToday(): string
     {
         $today = now()->toDateString();
-        $total = Histoy::where('status', 'settlement')
+        $total = History::where('status', 'settlement')
             ->whereDate('created_at', $today)
             ->sum('total_amount');
 
-        $count = Histoy::where('status', 'settlement')
+        $count = History::where('status', 'settlement')
             ->whereDate('created_at', $today)
             ->count();
 
@@ -354,7 +355,7 @@ class ChatController extends Controller
 
     private function getTotalTransactionsToday(): string
     {
-        $count = Histoy::where('status', 'settlement')
+        $count = History::where('status', 'settlement')
             ->whereDate('created_at', now())
             ->count();
 

@@ -25,14 +25,23 @@ class SettlementController extends Controller
 
     public function poststart(Request $request)
     {
-                $userStore = Auth::user()->store;
+        $userStore = Auth::user()->store;
 
         $data = $request->validate([
             'start_amount' => 'nullable|numeric',
         ]);
 
         $user = auth()->user();
+
+        $activeShift = $user->settlements()->active()->first();
+
+        if ($activeShift) {
+            return redirect(route('settlement'))->with('error', 'Shift sebelumnya belum ditutup. Tutup dulu sebelum membuka shift baru.');
+        }
+
+        $data['store_id'] = $userStore->id;
         $data['start_time'] = Carbon::now()->toDateTimeString();
+        $data['expected'] = $data['start_amount'] ?? 0;
 
         $user->settlements()->create($data);
 
@@ -50,18 +59,18 @@ class SettlementController extends Controller
         ]);
 
         $user = auth()->user();
-        $latestSettlement = $user->settlements()->latest()->first();
+        $activeShift = $user->settlements()->active()->first();
 
-        if (! $latestSettlement) {
-            return redirect(route('settlement'))->with('error', 'No active shift found to end.');
+        if (! $activeShift) {
+            return redirect(route('settlement'))->with('error', 'Tidak ada shift aktif yang bisa ditutup.');
         }
 
         $data['end_time'] = Carbon::now()->toDateTimeString();
-        $latestSettlement->update($data);
+        $activeShift->update($data);
 
         $this->clearCache($userStore->id);
-        
-        Cache::forget("settlement_{$latestSettlement->id}");
+
+        Cache::forget("settlement_{$activeShift->id}");
 
         return redirect(route('settlement'))->with('success', 'Shift ended successfully!');
     }

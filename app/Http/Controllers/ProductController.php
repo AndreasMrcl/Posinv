@@ -41,6 +41,8 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+        $userStore = auth()->user()->store;
+
         $data = $request->validate([
             'name' => 'required',
             'price' => 'required',
@@ -55,6 +57,8 @@ class ProductController extends Controller
             $imagePath = $uploadedImage->storeAs('img', $imageName, 'public');
             $data['img'] = 'img/'.$imageName;
         }
+
+        $data['store_id'] = $userStore->id;
 
         Menu::create($data);
 

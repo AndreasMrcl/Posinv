@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('store_id')->constrained()->onUpdate('cascade')->onDelete('cascade')->nullable();
+            $table->foreignId('store_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->string('name');
             $table->decimal('nominal', 10, 2);
             $table->timestamps();

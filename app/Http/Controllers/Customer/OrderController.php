@@ -1,16 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Customer;
 
+use App\Http\Controllers\Controller;
 use App\Models\Order;
-use Ramsey\Uuid\Uuid;
 use Illuminate\Http\Request;
+use Ramsey\Uuid\Uuid;
 
 class OrderController extends Controller
 {
     public function postorder(Request $request)
     {
-        $user = auth()->user();
+        $chair = auth()->user();
+        $storeId = $chair->store_id;
 
         $request->validate([
             'no_telpon' => 'required|string|max:15',
@@ -20,52 +22,59 @@ class OrderController extends Controller
             'ongkir' => 'nullable',
         ]);
 
-        $cart = $user->carts()->with('cartMenus.menu')->latest()->first();
+        $cart = $chair->carts()->with('cartMenus.menu')->latest()->first();
 
-        if (!$cart || $cart->cartMenus->isEmpty()) {
+        if (! $cart || $cart->cartMenus->isEmpty()) {
             return redirect()->route('user-cart')->with('error', 'Your cart is empty.');
         }
 
         $order = Order::where('cart_id', $cart->id)->first();
 
-        if (!$order) {
+        if (! $order) {
             return redirect()->route('user-home');
         }
 
-        $orderId = 'ORDER-' . strtoupper(substr(Uuid::uuid4()->toString(), 0, 8));
+        $orderId = 'ORDER-'.strtoupper(substr(Uuid::uuid4()->toString(), 0, 8));
 
         $order->update([
             'no_order' => $orderId,
             'atas_nama' => $request->atas_nama,
             'no_telpon' => $request->no_telpon,
+            'store_id' => $storeId,
         ]);
 
         $cart->update(['total_amount' => $cart->total_amount + ($order->ongkir ?? 0)]);
 
-        \Midtrans\Config::$serverKey = config('midtrans.server_key');
-        \Midtrans\Config::$isProduction = true;
-        \Midtrans\Config::$isSanitized = true;
-        \Midtrans\Config::$is3ds = true;
+        $snapToken = null;
 
-        $params = array(
-            'transaction_details' => array(
-                'order_id' => $orderId,
-                'gross_amount' => $order->cart->total_amount,
-            )
-        );
+        if (config('midtrans.server_key')) {
+            \Midtrans\Config::$serverKey = config('midtrans.server_key');
+            \Midtrans\Config::$isProduction = true;
+            \Midtrans\Config::$isSanitized = true;
+            \Midtrans\Config::$is3ds = true;
 
-        $snapToken = \Midtrans\Snap::getSnapToken($params);
+            $params = [
+                'transaction_details' => [
+                    'order_id' => $orderId,
+                    'gross_amount' => $order->cart->total_amount,
+                ],
+            ];
 
-        $user->carts()->create();
+            $snapToken = \Midtrans\Snap::getSnapToken($params);
+        }
+
+        $chair->carts()->create([
+            'store_id' => $storeId,
+        ]);
 
         return view('user.checkout', compact('order', 'snapToken'));
     }
 
     public function payment(Request $request)
     {
-        $user = auth()->user();
+        $chair = auth()->user();
 
-        $cart = $user->carts()->with('cartMenus.menu')->latest()->first();
+        $cart = $chair->carts()->with('cartMenus.menu')->latest()->first();
 
         $order = Order::where('cart_id', $cart->id)->first();
 

@@ -22,7 +22,7 @@
                 <div class="p-6 bg-white rounded-xl shadow-xl">
                     <h1 class="font-light">Total Order</h1>
                     <i class="fa fa-arrow-up text-lime-500"></i>
-                    <canvas id="grafikHistoy" width="100" height="50"></canvas>
+                    <canvas id="grafikHistory" width="100" height="50"></canvas>
                 </div>
                 <!-- chart 2: Total Revenue -->
                 <div class="p-6 bg-white rounded-xl shadow-xl">
@@ -87,7 +87,7 @@
                 }
             }
         };
-        new Chart(document.getElementById('grafikHistoy'), config1);
+        new Chart(document.getElementById('grafikHistory'), config1);
 
         // CHART 2: Total Revenue
         const labels2 = {{ Js::from($labels2) }};

@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('store_id')->constrained()->onUpdate('cascade')->onDelete('cascade')->nullable();
+            $table->foreignId('store_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('cart_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->string('no_order')->nullable();
             $table->string('cabang')->nullable();

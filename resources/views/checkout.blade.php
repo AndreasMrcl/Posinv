@@ -4,8 +4,10 @@
 <head>
     <title>Checkout</title>
     @include('layout.head')
-    <script type="text/javascript" src="https://app.midtrans.com/snap/snap.js"
-        data-client-key="Mid-client-KrOCGoZpRFFFE4Ey"></script>
+    @if (! empty($snapToken))
+        <script type="text/javascript" src="https://app.midtrans.com/snap/snap.js"
+            data-client-key="{{ config('midtrans.client_key') }}"></script>
+    @endif
 </head>
 
 <body class="bg-gray-50">
@@ -64,9 +66,11 @@
                             </h1>
                         </div>
                         <div class="flex gap-4">
-                            <button id="pay-button" type="button"
-                                class="bg-blue-500 text-xl text-white p-2 w-fit hover:text-black rounded-lg">Online
-                                Payment</button>
+                            @if (! empty($snapToken))
+                                <button id="pay-button" type="button"
+                                    class="bg-blue-500 text-xl text-white p-2 w-fit hover:text-black rounded-lg">Online
+                                    Payment</button>
+                            @endif
                             <form action="{{ route('cashpayment') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="order_id" value="{{ $order->id }}">
@@ -90,31 +94,33 @@
         };
 
         var payButton = document.getElementById('pay-button');
-        payButton.addEventListener('click', function(event) {
-            event.preventDefault();
-            @if (isset($snapToken))
-                window.snap.pay('{{ $snapToken }}', {
-                    onSuccess: function(result) {
-                        console.log('Payment successful!', result);
-                        window.location.href = '{{ route('order') }}'; // Redirect to dashboard
-                    },
-                    onPending: function(result) {
-                        console.log('Payment pending', result);
-                        window.location.href = '{{ route('order') }}'; // Redirect to dashboard
-                    },
-                    onError: function(result) {
-                        console.error('Payment failed', result);
-                        window.location.href = '{{ route('order') }}'; // Redirect to dashboard
-                    },
-                    onClose: function() {
-                        console.log('Payment popup closed');
-                        window.location.href = '{{ route('order') }}'; // Redirect to dashboard
-                    }
-                });
-            @else
-                console.error('Snap token is not set!');
-            @endif
-        });
+        if (payButton) {
+            payButton.addEventListener('click', function(event) {
+                event.preventDefault();
+                @if (! empty($snapToken))
+                        window.snap.pay('{{ $snapToken }}', {
+                        onSuccess: function(result) {
+                            console.log('Payment successful!', result);
+                            window.location.href = '{{ route('order') }}'; // Redirect to dashboard
+                        },
+                        onPending: function(result) {
+                            console.log('Payment pending', result);
+                            window.location.href = '{{ route('order') }}'; // Redirect to dashboard
+                        },
+                        onError: function(result) {
+                            console.error('Payment failed', result);
+                            window.location.href = '{{ route('order') }}'; // Redirect to dashboard
+                        },
+                        onClose: function() {
+                            console.log('Payment popup closed');
+                            window.location.href = '{{ route('order') }}'; // Redirect to dashboard
+                        }
+                    });
+                @else
+                    console.error('Snap token is not set!');
+                @endif
+            });
+        }
 
         // Handle cash input change and calculate change
         document.getElementById('cash-input').addEventListener('input', function() {

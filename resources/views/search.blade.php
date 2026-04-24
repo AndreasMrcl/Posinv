@@ -244,7 +244,7 @@
                                                     <td>{{ $history->created_at }}</td>
                                                     <td>{{ $history->no_order }}</td>
                                                     <td>{{ $history->name }}</td>
-                                                    <td>{{ $history->kursi }}</td>
+                                                    <td>{{ $history->akun }}</td>
                                                     <td>
                                                         @php $orders = explode(' - ', $history->order);
                                                         @endphp

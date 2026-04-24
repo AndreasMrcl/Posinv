@@ -14,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'ensure' => \App\Http\Middleware\EnsureStoreIsValid::class,
         ]);
+
+        $middleware->web(append: [
+            \RealRashid\SweetAlert\ToSweetAlert::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -43,8 +43,11 @@ class IngredientController extends Controller
             'ingredients.*.quantity_used' => 'required|numeric|min:1',
         ]);
 
+        $storeId = auth()->user()->store->id;
+
         foreach ($request->ingredients as $ingredient) {
             InventMenu::create([
+                'store_id' => $storeId,
                 'menu_id' => $request->menu_id,
                 'invent_id' => $ingredient['invent_id'],
                 'quantity_used' => $ingredient['quantity_used'],
@@ -77,9 +80,12 @@ class IngredientController extends Controller
         // Hapus ingredients lama
         InventMenu::where('menu_id', $menu->id)->delete();
 
+        $storeId = auth()->user()->store->id;
+
         // Tambahkan ingredients baru
         foreach ($request->ingredients as $ingredient) {
             InventMenu::create([
+                'store_id' => $storeId,
                 'menu_id' => $menu->id,
                 'invent_id' => $ingredient['invent_id'],
                 'quantity_used' => $ingredient['quantity_used'],

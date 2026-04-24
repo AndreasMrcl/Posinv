@@ -14,6 +14,7 @@ class Invent extends Model
             'store_id',
             'name',
             'stock',
+            'min_stock',
             'unit',
         ];
 
@@ -27,5 +28,16 @@ class Invent extends Model
     public function store()
     {
         return $this->belongsTo(Store::class);
+    }
+
+    public function scopeLowStock($query)
+    {
+        return $query->where('min_stock', '>', 0)
+            ->whereColumn('stock', '<=', 'min_stock');
+    }
+
+    public function isLowStock(): bool
+    {
+        return $this->min_stock > 0 && $this->stock <= $this->min_stock;
     }
 }

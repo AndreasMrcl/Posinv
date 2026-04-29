@@ -17,9 +17,6 @@ class OrderController extends Controller
         $request->validate([
             'no_telpon' => 'required|string|max:15',
             'atas_nama' => 'required|string|max:255',
-            'cabang' => 'required|string|max:255',
-            'alamat' => 'nullable',
-            'ongkir' => 'nullable',
         ]);
 
         $cart = $chair->carts()->with('cartMenus.menu')->latest()->first();
@@ -41,9 +38,9 @@ class OrderController extends Controller
             'atas_nama' => $request->atas_nama,
             'no_telpon' => $request->no_telpon,
             'store_id' => $storeId,
+            'cabang' => $chair->store->store ?? $chair->store->name,
+            'alamat' => $chair->name,
         ]);
-
-        $cart->update(['total_amount' => $cart->total_amount + ($order->ongkir ?? 0)]);
 
         $snapToken = null;
 
@@ -56,7 +53,7 @@ class OrderController extends Controller
             $params = [
                 'transaction_details' => [
                     'order_id' => $orderId,
-                    'gross_amount' => $order->cart->total_amount,
+                    'gross_amount' => $cart->total_amount,
                 ],
             ];
 
@@ -76,7 +73,18 @@ class OrderController extends Controller
 
         $cart = $chair->carts()->with('cartMenus.menu')->latest()->first();
 
+        if (! $cart || $cart->cartMenus->isEmpty()) {
+            return redirect()->route('user-cart')->with('error', 'Keranjang masih kosong.');
+        }
+
         $order = Order::where('cart_id', $cart->id)->first();
+
+        if (! $order) {
+            $order = Order::create([
+                'store_id' => $chair->store_id,
+                'cart_id' => $cart->id,
+            ]);
+        }
 
         return view('user.payment', compact('order', 'cart'));
     }

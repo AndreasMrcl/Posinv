@@ -16,7 +16,7 @@ class OrderController extends Controller
 {
     public function index()
     {
-        $orders = Order::with(['cart.user', 'cart.cartMenus.menu'])->get();
+        $orders = Order::with(['cart.user', 'cart.chair', 'cart.cartMenus.menu'])->get();
         $statuses = [];
 
         foreach ($orders as $order) {
@@ -180,7 +180,7 @@ class OrderController extends Controller
             $history->id = $order->id; // Assuming you want to keep the same ID
             $history->store_id = $settlement->store_id;
             $history->no_order = $order->no_order;
-            $history->akun = $order->cart->user->name;
+            $history->akun = $order->cart->user->name ?? $order->cart->chair->name ?? '-';
             $history->name = $order->atas_nama;
             $orderDetails = '';
 

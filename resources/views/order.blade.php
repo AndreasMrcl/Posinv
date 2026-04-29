@@ -54,7 +54,7 @@
                                         <td>{{ $order->no_order }}</td>
                                         <td>{{ $order->atas_nama }}</td>
                                         <td>{{ $order->layanan }}</td>
-                                        <td>{{ $order->cart->user->name }}</td>
+                                        <td>{{ $order->cart->user->name ?? $order->cart->chair->name ?? '-' }}</td>
                                         <td>
                                             @foreach ($order->cart->cartMenus as $cartMenu)
                                                 {{ $cartMenu->menu->name }} - {{ $cartMenu->quantity }} -

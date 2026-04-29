@@ -12,15 +12,19 @@
             {{-- NAVBAR --}}
             <div class="fixed top-0 left-0 right-0 z-50 w-full sm:max-w-sm mx-auto">
                 <div class="p-4 bg-white shadow-xl space-y-4 rounded-b-[20px]">
-                    <div class="flex ">
-                        <a href="{{ route('user-home') }}">
-                            <div>
-                                <img src="{{ asset('/img/home.svg') }}" alt="">
-                            </div>
+                    <div class="flex items-center">
+                        <a href="{{ route('user-home') }}" class="p-2 -ml-2 text-gray-700 hover:text-black">
+                            <span class="material-icons">arrow_back</span>
                         </a>
                         <div class="mx-auto">
-                            <h1 class="text-center text-xl font-extralight">Our Products </h1>
+                            <h1 class="text-center text-xl font-extralight">Our Products</h1>
                         </div>
+                        <a href="{{ route('user-cart') }}" class="p-2 -mr-2 text-gray-700 hover:text-black relative">
+                            <span class="material-icons">shopping_cart</span>
+                            @if ($cart && $cart->cartMenus->count() > 0)
+                                <span class="absolute top-0 right-0 bg-red-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">{{ $cart->cartMenus->count() }}</span>
+                            @endif
+                        </a>
                     </div>
                     <hr>
                     <div class="flex justify-between mx-10">

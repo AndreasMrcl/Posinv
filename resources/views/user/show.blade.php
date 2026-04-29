@@ -14,15 +14,16 @@
                 @csrf
                 <div class="fixed top-0 left-0 right-0 z-50 w-full sm:max-w-sm mx-auto">
                     <div class="p-6 bg-white shadow-xl space-y-4 rounded-b-[20px]">
-                        <div class="flex ">
-                            <a href="{{ route('user-product') }}">
-                                <div>
-                                    <img src="{{ asset('/img/back.svg') }}" alt="">
-                                </div>
+                        <div class="flex items-center">
+                            <a href="{{ route('user-product') }}" class="p-2 -ml-2 text-gray-700 hover:text-black">
+                                <span class="material-icons">arrow_back</span>
                             </a>
                             <div class="mx-auto">
-                                <h1 class="text-center text-xl font-extralight">Details</h1>
+                                <h1 class="text-center text-xl font-extralight">Detail</h1>
                             </div>
+                            <a href="{{ route('user-home') }}" class="p-2 -mr-2 text-gray-700 hover:text-black">
+                                <span class="material-icons">home</span>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -33,17 +34,13 @@
                 <div class="p-4 space-y-4">
                     <input type="hidden" name="menu_id" value="{{ $menu->id }}">
                     <input type="hidden" name="quantity" id="quantityInput" value="1">
-                    <div class="flex flex-col justify-end items-end ">
+                    <div class="flex flex-col justify-end items-end">
                         <div class="p-2 border-red-800 rounded-md border-2 w-fit shadow-xl">
-                            <div class="flex gap-2">
-                                <div class="w-8 h-8">
-                                    <img class="w-full h-full" src="{{ asset('/img/money.svg') }}" alt="">
-                                </div>
-                                <div class="">
-                                    <h1 class="text-black text-2xl font-bold">Rp.
-                                        {{ number_format($menu->price, 0, ',', '.') }}
-                                    </h1>
-                                </div>
+                            <div class="flex gap-2 items-center">
+                                <span class="material-icons text-red-800">payments</span>
+                                <h1 class="text-black text-2xl font-bold">Rp.
+                                    {{ number_format($menu->price, 0, ',', '.') }}
+                                </h1>
                             </div>
                         </div>
                     </div>

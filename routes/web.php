@@ -9,7 +9,6 @@ use App\Http\Controllers\Customer\CartController as CustomerCartController;
 use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
 use App\Http\Controllers\Customer\PagesController as CustomerPagesController;
 use App\Http\Controllers\Customer\ProductController as CustomerProductController;
-use App\Http\Controllers\Customer\ServeController as CustomerServeController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\HistoryController;
@@ -148,13 +147,6 @@ Route::middleware(['auth:chair', 'ensure'])->group(function () {
     Route::delete('/customer/cart/{id}/delete', [CustomerCartController::class, 'removecart'])->name('user-removecart');
     Route::post('/customer/cart/acknowledge', [CustomerCartController::class, 'acknowledge'])->name('user-cart-acknowledge');
     Route::post('/customer/cart/reset', [CustomerCartController::class, 'reset'])->name('user-cart-reset');
-
-    // CUSTOMER SERVE CONTROLLER
-    Route::get('/customer/serve', [CustomerServeController::class, 'serve'])->name('user-serve');
-    Route::get('/customer/locate', [CustomerServeController::class, 'locate'])->name('user-locate');
-    Route::post('/customer/serve/dinein', [CustomerServeController::class, 'postDineIn'])->name('user-postdineIn');
-    Route::post('/customer/serve/delivery', [CustomerServeController::class, 'postDelivery'])->name('user-postdelivery');
-    Route::post('/customer/ongkir', [CustomerServeController::class, 'ongkir'])->name('user-ongkir');
 
     // CUSTOMER ORDER CONTROLLER
     Route::post('/customer/order', [CustomerOrderController::class, 'postorder'])->name('user-postorder');

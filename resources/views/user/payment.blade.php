@@ -7,22 +7,23 @@
 </head>
 
 <body class="font-poppins bg-gray-50">
-    <div class='w-full sm:max-w-sm mx-auto h-screen'>
-        <form action="{{ route('user-postorder') }}" method="POST" enctype="multipart/form-data">
+    <div class='w-full sm:max-w-sm mx-auto min-h-screen'>
+        <form action="{{ route('user-postorder') }}" method="POST">
             @csrf
             <div class='sm:max-w-sm'>
-                <!-- NAVBAR -->
+                {{-- NAVBAR --}}
                 <div class="fixed top-0 left-0 right-0 z-50 w-full sm:max-w-sm mx-auto">
                     <div class="p-4 bg-white shadow-xl space-y-4 rounded-b-[20px]">
-                        <div class="flex ">
-                            <a href="{{ route('user-home') }}">
-                                <div>
-                                    <img src="{{ asset('/img/home.svg') }}" alt="">
-                                </div>
+                        <div class="flex items-center">
+                            <a href="{{ route('user-cart') }}" class="p-2 -ml-2 text-gray-700 hover:text-black">
+                                <span class="material-icons">arrow_back</span>
                             </a>
                             <div class="mx-auto">
                                 <h1 class="text-center text-xl font-extralight">Payment</h1>
                             </div>
+                            <a href="{{ route('user-home') }}" class="p-2 -mr-2 text-gray-700 hover:text-black">
+                                <span class="material-icons">home</span>
+                            </a>
                         </div>
                         <hr>
                         <div class="flex justify-between mx-10">
@@ -60,92 +61,71 @@
 
                 <div class="h-32"></div>
 
-                <!-- BODY -->
+                {{-- BODY --}}
                 <div class="p-4 space-y-4">
                     <div class="space-y-2">
-                        <h1><span class="text-red-500">*</span> Detail Pembayaran</h1>
-                        <p class="text-xs">Data digunakan dalam proses pemesanan. Pastikan data yang Anda masukkan
-                            valid.</p>
-                    </div>
-                    
-                    <div class="space-y-2">
-                        <h1><span class="text-red-500">*</span> Pilih Layanan</h1>
-                        <input class="border w-full rounded-xl p-2" value="{{ $order->layanan }}" type="text"
-                            id="layanan" name="layanan">
+                        <h1 class="font-semibold"><span class="text-red-500">*</span> Detail Pembayaran</h1>
+                        <p class="text-xs text-gray-600">Data digunakan dalam proses pemesanan. Pastikan data yang Anda masukkan valid.</p>
                     </div>
 
                     <div class="space-y-2">
-                        <h1><span class="text-red-500">*</span> Cabang</h1>
-                        <input class="border w-full rounded-xl p-2" id="cabang" type="text" name="cabang"
-                            value="{{ $order->cabang }}" readonly>
+                        <label class="text-sm font-medium"><span class="text-red-500">*</span> Atas Nama</label>
+                        <input class="border w-full rounded-xl p-3" placeholder="Nama Anda" id="atas_nama" type="text"
+                            name="atas_nama" required>
                     </div>
 
                     <div class="space-y-2">
-                        <h1><span class="text-red-500">*</span> Atas Nama</h1>
-                        <input class="border w-full rounded-xl p-2" placeholder="John Doe" id="atas_nama" type="text"
-                            name="atas_nama">
+                        <label class="text-sm font-medium"><span class="text-red-500">*</span> Nomor Ponsel</label>
+                        <input class="border w-full rounded-xl p-3" placeholder="08XXXXXXXX" id="no_telpon"
+                            name="no_telpon" required>
                     </div>
 
                     <div class="space-y-2">
-                        <h1><span class="text-red-500">*</span> Nomor Ponsel</h1>
-                        <input class="border w-full rounded-xl p-2" placeholder="08XXXXXXXX" id="no_telpon"
-                            name="no_telpon">
-                    </div>
-
-                    <div class="space-y-2">
-                        <h1><span class="text-red-500">*</span> Cart</h1>
+                        <label class="text-sm font-medium">Ringkasan Pesanan</label>
                         <div class="space-y-2 border py-4 rounded-xl">
                             @foreach ($cart->cartMenus as $item)
-                                <div class="grid grid-cols-3">
-                                    <div class="w-12 h-24 mx-auto">
+                                <div class="grid grid-cols-3 px-2">
+                                    <div class="w-12 h-20 mx-auto">
                                         <img src="{{ asset('storage/img/' . basename($item->menu->img)) }}"
-                                            alt="Product Image" class="mx-auto my-auto w-full h-full" />
+                                            alt="Product Image" class="mx-auto my-auto w-full h-full object-cover" />
                                     </div>
-                                    <div>
-                                        <div class="flex justify-between">
-                                            <h1 class="font-bold">{{ $item->quantity }}</h1>
-                                            <h1>x</h1>
-                                            <h1 class="font-bold">{{ $item->menu->name }}</h1>
+                                    <div class="my-auto">
+                                        <div class="flex justify-between gap-2">
+                                            <h1 class="font-bold">{{ $item->quantity }}x</h1>
+                                            <h1 class="font-bold flex-1">{{ $item->menu->name }}</h1>
                                         </div>
-                                        <p class="font-extralight">-{{ $item->notes }}</p>
+                                        @if ($item->notes)
+                                            <p class="font-extralight text-xs">- {{ $item->notes }}</p>
+                                        @endif
                                     </div>
-                                    <div class="text-center mx-auto">
-                                        <h1 class="font-semibold text-lg">
+                                    <div class="text-right my-auto">
+                                        <h1 class="font-semibold text-base">
                                             Rp.{{ number_format($item->subtotal, 0, ',', '.') }}
                                         </h1>
                                     </div>
                                 </div>
                             @endforeach
 
-                            <div class="space-y-2">
-                                <div class="border-t mx-2 p-2">
-                                    <div class="flex justify-between">
-                                        <h1 class="font-semibold text-lg">Sub Total</h1>
-                                        <h1 class="font-bold text-lg">
-                                            Rp.{{ number_format($cart->total_amount, 0, ',', '.') }}
-                                        </h1>
-                                    </div>
-                                </div>
-                                <div class="border-t mx-2 p-2">
-                                    <div class="flex justify-between">
-                                        <h1 class="font-semibold text-lg">Ongkos Kirim</h1>
-                                        <h1 class="font-bold text-lg">
-                                            Rp.{{ number_format($order->ongkir, 0, ',', '.') }}
-                                        </h1>
-                                    </div>
+                            <div class="border-t mx-2 p-2 mt-2">
+                                <div class="flex justify-between">
+                                    <h1 class="font-semibold text-lg">Total</h1>
+                                    <h1 class="font-bold text-lg">
+                                        Rp.{{ number_format($cart->total_amount, 0, ',', '.') }}
+                                    </h1>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- FOOTER -->
-                <div class="h-20"></div>
-                <div class="fixed bottom-4 sm:max-w-sm w-full z-50 p-2">
+
+                {{-- FOOTER --}}
+                <div class="h-24"></div>
+                <div class="fixed bottom-4 sm:max-w-sm w-full z-50 p-2 mx-auto left-0 right-0">
                     <div class="flex flex-col items-center justify-center">
                         <button class="w-3/4" type="submit">
                             <h1
-                                class="bg-black bg-opacity-90 text-xl font-bold text-white w-full mx-auto text-base p-3 rounded-full text-center">
-                                Payment >
+                                class="bg-black bg-opacity-90 font-bold text-white w-full mx-auto text-base p-3 rounded-full text-center">
+                                Bayar Sekarang >
                             </h1>
                         </button>
                     </div>

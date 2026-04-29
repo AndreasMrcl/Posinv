@@ -13,15 +13,14 @@
             {{-- NAVBAR --}}
             <div class="fixed top-0 left-0 right-0 z-50 w-full sm:max-w-sm mx-auto">
                 <div class="p-6 bg-white shadow-xl space-y-4 rounded-b-[20px]">
-                    <div class="flex ">
-                        <a href="{{ route('user-home') }}">
-                            <div>
-                                <img src="{{ asset('/img/home.svg') }}" alt="">
-                            </div>
+                    <div class="flex items-center">
+                        <a href="{{ route('user-home') }}" class="p-2 -ml-2 text-gray-700 hover:text-black">
+                            <span class="material-icons">arrow_back</span>
                         </a>
                         <div class="mx-auto">
                             <h1 class="text-center text-xl font-extralight">Antrian</h1>
                         </div>
+                        <div class="w-10"></div>
                     </div>
                 </div>
             </div>

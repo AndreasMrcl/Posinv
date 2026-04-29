@@ -131,16 +131,11 @@
                         </div>
                         @auth
                             <div class="flex flex-col items-end">
-                                <form class="" action="{{ route('logout') }}" method="POST">
+                                <form action="{{ route('logout') }}" method="POST">
                                     @csrf
-                                    <div class="bg-white p-1.5 rounded-md">
-                                        <div class="my-auto">
-                                            <button type="submit">
-                                                <img class="my-auto mx-auto" src="{{ asset('img/logout.svg') }}"
-                                                    alt="">
-                                            </button>
-                                        </div>
-                                    </div>
+                                    <button type="submit" class="bg-white p-2 rounded-md text-red-900 hover:bg-gray-100">
+                                        <span class="material-icons">logout</span>
+                                    </button>
                                 </form>
                             </div>
                         @endauth
@@ -161,35 +156,29 @@
                         </div>
                     </div>
                     @auth
-                        <div class="grid grid-cols-3 gap-6">
-                            <a class="" href="{{ route('user-product') }}">
-                                <div class="p-1 border rounded-xl bg-red-900 shadow-xl">
-                                    <div class="mx-auto w-6 h-12">
-                                        <img class="w-full h-full" src="{{ asset('/img/menu.svg') }}" alt="">
-                                    </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <a href="{{ route('user-product') }}">
+                                <div class="p-3 border rounded-xl bg-red-900 shadow-xl flex justify-center">
+                                    <span class="material-icons text-white text-3xl">restaurant_menu</span>
                                 </div>
                                 <div>
-                                    <h1 class="text-base font-light text-black text-center">Product</h1>
+                                    <h1 class="text-base font-light text-black text-center mt-1">Menu</h1>
                                 </div>
                             </a>
-                            <a class="" href="{{ route('user-antrian') }}">
-                                <div class="p-1 border rounded-xl bg-red-900 shadow-xl">
-                                    <div class="mx-auto w-6 h-12">
-                                        <img class="w-full h-full" src="{{ asset('/img/antrian.svg') }}" alt="">
-                                    </div>
+                            <a href="{{ route('user-antrian') }}">
+                                <div class="p-3 border rounded-xl bg-red-900 shadow-xl flex justify-center">
+                                    <span class="material-icons text-white text-3xl">receipt_long</span>
                                 </div>
                                 <div>
-                                    <h1 class="text-base font-light text-black text-center">Entry</h1>
+                                    <h1 class="text-base font-light text-black text-center mt-1">Pesanan</h1>
                                 </div>
                             </a>
-                            <a class="" href="{{ route('user-akun') }}">
-                                <div class="p-1 border rounded-xl bg-red-900 shadow-xl">
-                                    <div class="mx-auto w-6 h-12">
-                                        <img class="w-full h-full" src="{{ asset('/img/profil.svg') }}" alt="">
-                                    </div>
+                            <a href="{{ route('user-akun') }}">
+                                <div class="p-3 border rounded-xl bg-red-900 shadow-xl flex justify-center">
+                                    <span class="material-icons text-white text-3xl">table_restaurant</span>
                                 </div>
                                 <div>
-                                    <h1 class="text-base font-light text-black text-center">Akun</h1>
+                                    <h1 class="text-base font-light text-black text-center mt-1">Meja</h1>
                                 </div>
                             </a>
                         </div>

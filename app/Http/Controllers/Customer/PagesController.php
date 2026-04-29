@@ -48,7 +48,7 @@ class PagesController extends Controller
 
     public function antrian()
     {
-        $orders = Order::with(['cart.user', 'cart.cartMenus.menu'])->get();
+        $orders = Order::with(['cart.user', 'cart.chair', 'cart.cartMenus.menu'])->get();
         $statuses = [];
 
         foreach ($orders as $order) {

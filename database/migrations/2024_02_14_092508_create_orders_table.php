@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('cabang')->nullable();
             $table->string('atas_nama')->nullable();
             $table->string('status')->nullable();
-            $table->string('alamat')->nullable();
             $table->enum('layanan', [
                 'dine-in',
                 'take-away',

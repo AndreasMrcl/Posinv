@@ -101,35 +101,18 @@
                     </div>
                 </div>
 
-                @if (empty($snapToken))
-                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-3 rounded-lg">
-                        <p class="text-sm text-yellow-800">
-                            <strong>Pembayaran online sedang tidak tersedia.</strong> Silakan hubungi kasir untuk
-                            menyelesaikan pesanan ini. Order Anda sudah tercatat dengan ID di atas.
-                        </p>
-                    </div>
-                @endif
             </div>
 
             {{-- FOOTER --}}
             <div class="h-24"></div>
             <div class="fixed bottom-4 sm:max-w-sm w-full p-2 mx-auto left-0 right-0">
                 <div class="flex flex-col items-center justify-center">
-                    @if (! empty($snapToken))
-                        <button class="w-3/4" id="pay-button" type="button">
-                            <h1
-                                class="bg-black bg-opacity-90 font-bold text-white w-full mx-auto text-base p-3 rounded-full text-center">
-                                Bayar Sekarang
-                            </h1>
-                        </button>
-                    @else
-                        <a href="{{ route('user-antrian') }}" class="w-3/4">
-                            <h1
-                                class="bg-gray-800 font-bold text-white w-full mx-auto text-base p-3 rounded-full text-center">
-                                Lihat Antrian
-                            </h1>
-                        </a>
-                    @endif
+                    <button class="w-3/4" id="pay-button" type="button" {{ empty($snapToken) ? 'disabled' : '' }}>
+                        <h1
+                            class="bg-black bg-opacity-90 font-bold text-white w-full mx-auto text-base p-3 rounded-full text-center {{ empty($snapToken) ? 'opacity-50' : '' }}">
+                            Checkout
+                        </h1>
+                    </button>
                 </div>
             </div>
         </div>
@@ -176,7 +159,7 @@
 
             function resetButton() {
                 payButton.disabled = false;
-                buttonContent.textContent = 'Bayar Sekarang';
+                buttonContent.textContent = 'Checkout';
                 buttonContent.classList.remove('animate-pulse');
             }
         </script>

@@ -39,7 +39,6 @@
                                 <th>Order</th>
                                 <th>Payment</th>
                                 <th>Total</th>
-                                <th>Tujuan</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </thead>
@@ -65,7 +64,6 @@
                                         <td>
                                             Rp. {{ number_format($order->cart->total_amount, 0, ',', '.') }}
                                         </td>
-                                        <td>{{ $order->alamat }}</td>
                                         <td>{{ $order->status }}</td>
                                         <td class="flex gap-2">
                                             <div class="w-full">

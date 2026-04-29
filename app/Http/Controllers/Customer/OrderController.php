@@ -39,7 +39,6 @@ class OrderController extends Controller
             'no_telpon' => $request->no_telpon,
             'store_id' => $storeId,
             'cabang' => $chair->store->store ?? $chair->store->name,
-            'alamat' => $chair->name,
         ]);
 
         $snapToken = null;
